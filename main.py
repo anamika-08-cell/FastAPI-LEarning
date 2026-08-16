@@ -1,40 +1,28 @@
-from fastapi import FastAPI ,status, HTTPException
-
+from fastapi import FastAPI, HTTPException,Request
+from fastapi.responses import JSONResponse
 app = FastAPI()
-
-@app.post("/create_user", status_code=status.HTTP_201_CREATED)
-def create_user():
-    return{
-        "User has Created!!"
-    }
-
-@app.get("/create-users")
-def create_users():
-
-    return{
-        "status": 200,
-        "msg":"user fetched",
-        "data":{
-            "name":"mohit",
-            "age":15
+class UserNotFoundException(Exception):
+    def __init__(self, name):
+        self.name = name
+@app.exception_handler(UserNotFoundException)
+def user_not_found_exception(request : Request, exc : UserNotFoundException):
+    return JSONResponse(
+        status_code=404,
+        content={
+            "status":"error",
+            "msg":f"user not found {exc.name}."
         }
-    }
-
-@app.get("/user/{user_id}")
-def get_user(user_id:int):
-    if user_id != 1:
-        raise HTTPException(
-            status_code = 404,
-            detail = "user has not fetched successfully."
-        )
+    )
+@app.get("/create_user")
+def create_user(name):
+    if name != "mohit":
+        raise UserNotFoundException(name)
     return {
-        "id" : 1,
-        "name" :"mohit",
-        "age": 10
-
+        "name":name
     }
-            
-        
+
+
+
     
 
 

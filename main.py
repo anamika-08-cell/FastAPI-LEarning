@@ -1,28 +1,24 @@
-from fastapi import FastAPI,Request
-import time
-
+import sqlite3
+from fastapi import FastAPI
 app = FastAPI()
+conn = sqlite3.connect("test.db", check_same_thread=False)
 
-# @app.middleware("http")
-# async def my_middleware(request:Request,call_next):
-#     print("request received")
+cursor = conn.cursor()
 
-#     response = await call_next(request)
-#     print("response sent .")
-#     return response
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS todos(
+id INTEGER PRIMARY KEY,
+title TEXT,
+completed TEXT)""")
 
-@app.middleware("http")
-async def userr_middleware(request:Request,call_next):
-    start_time = time.time()
+conn.commit()
 
-    response = await call_next(request)
+@app.get("/")
+def home():
+    return {
+        "msg":"SQL connected."
+    }
 
-    process_time = time.time() - start_time
-
-    print(f"path:{request.url.path} | time : {process_time}")
-
-    return response
-    
 
     
 
